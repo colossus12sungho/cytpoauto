@@ -26,7 +26,7 @@ def get_target_price(ticker, k):
 
 def get_start_time(ticker):
     """시작 시간 조회"""
-    df = pyupbit.get_ohlcv(ticker, interval="minute240", count=1)
+    df = pyupbit.get_ohlcv(ticker, interval="day", count=1)
     start_time = df.index[0]
     return start_time
 
@@ -59,4 +59,5 @@ headers = {"Accept": "application/json"}
 
 response = requests.request("GET", url, headers=headers)
 
-print(response.text)
+print(get_start_time("KRW-SXP"))
+print(get_start_time("KRW-SXP") + datetime.timedelta(hours=24))

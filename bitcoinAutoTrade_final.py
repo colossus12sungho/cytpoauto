@@ -82,13 +82,35 @@ target_coin_origine = ['KRW-AAVE','KRW-1INCH','KRW-ADA','KRW-AERGO','KRW-AHT','K
 
 target_coin = ['KRW-POWR', 'KRW-BORA', 'KRW-BTC', 'KRW-CBK', 'KRW-ATOM', 'KRW-XRP', 'KRW-HUM', 'KRW-ELF', 'KRW-NEAR', 'KRW-SAND']
 
+value =[]
+i= 0
+for i in target_coin_origine:
+ url = "https://api.upbit.com/v1/candles/minutes/240?market="+i+"&count=1"
+ headers = {"Accept": "application/json"}
+ response = requests.request("GET", url, headers=headers)
+
+ result = json.loads(response.text)
+ new_data1=result[0]
+
+ value.append(round(new_data1['candle_acc_trade_price'],-6)/1000000)
+ time.sleep(0.2)
+trade_price = dict(zip(target_coin_origine,value))
+Target_coin_sort = sorted(trade_price.items(), key=lambda item:item[1] ,reverse=True)
+new=list(dict(Target_coin_sort).keys())
+target_coin = new[0:10]  # 타겟 코인 반환
+post_message(myToken,"#coin", "변경 목표 코인 리스트 : " + str(target_coin) )
+          
+
+
+
+
 while True:
     try:
         now = datetime.datetime.now()
-        start_time = get_start_time("KRW-SXP")
+        start_time = get_start_time("KRW-SXP") - datetime.timedelta(hours=3)
         end_time = start_time + datetime.timedelta(hours=24)
 
-        if start_time < now < end_time - datetime.timedelta(minutes=30):
+        if start_time < now < end_time - datetime.timedelta(minutes=60):
 
          #구매 
          i=0
@@ -99,7 +121,7 @@ while True:
             btc = get_balance(target_coin[i].replace("KRW-",""))
             if target_price < current_price and ma15 < current_price:
                 krw = get_balance("KRW")
-                if krw > 16000 and get_balance(target_coin[i].replace("KRW-",""))* get_current_price(target_coin[i]) < 200000 :
+                if krw > 16000 and get_balance(target_coin[i].replace("KRW-",""))* get_current_price(target_coin[i]) < 300000 :
                     buy_result = upbit.buy_market_order(target_coin[i], krw*0.3)
                     time.sleep(0.5)
                     post_message(myToken,"#coin", target_coin[i] + " 매수 : " + str(buy_result["locked"]) + "원 (평단가 :" + str(upbit.get_avg_buy_price(target_coin[i])) + ")" )
@@ -109,7 +131,10 @@ while True:
                 profit_rate = ( (get_current_price(target_coin[i])-avg_price)/avg_price)
                 if profit_rate < -0.04 : # 손절 비율
                     sell_result = upbit.sell_market_order(target_coin[i], btc)
+                    target_coin[i] = new[10+j]
+                    j=j+1
                     post_message(myToken,"#coin", target_coin[i] + " 손절 : 평단가 : (" + str(avg_price) +"원) 매도가 : ("+ str(get_current_price(target_coin[i]))+"원)")
+                    post_message(myToken,"#coin", target_coin[i] + " 손절 코인 대체:" + str(target_coin[i].replace("KRW-","")) + "->" + str(new[10+j].replace("KRW-","")))
                     time.sleep(0.5)
             i=i+1
 
@@ -149,6 +174,7 @@ while True:
                 new=list(dict(Target_coin_sort).keys())
                 target_coin = new[0:10]  # 타겟 코인 반환
                 post_message(myToken,"#coin", "변경 목표 코인 리스트 : " + str(target_coin) )
+                j=0 #손절코인 초기화 
                 time.sleep(50)
         
         time.sleep(1)
