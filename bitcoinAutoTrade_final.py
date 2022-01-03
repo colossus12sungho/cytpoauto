@@ -8,7 +8,7 @@ import operator
 
 access = "kdxhHTdscPwSzJkQ6gXm2aNxMcg3EJ0n4us75rVM"
 secret = "H7uk9TQMQnVsoq3reKux3F7pz181IVi7E8DwAcca"
-myToken = "xoxb-2883000978711-2899910699588-bzLIuSFAI8pQ15XOLg6XmPPA"
+myToken = "xoxb-2883000978711-2899910699588-uFXvMZTFnDfxPnxdl4B1Wxkf"
 
 def post_message(token, channel, text):
     """슬랙 메시지 전송"""
